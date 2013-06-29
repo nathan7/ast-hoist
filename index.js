@@ -1,14 +1,17 @@
 module.exports = exports = Hoist
 exports.Hoist = Hoist
 
-function Hoist() {
+function Hoist(recurse) {
+  recurse = !!recurse
   var visitors = []
     , visitor
   return (
   { enter: function(node, parent) {
       var ret = visitor && visitor.enter && visitor.enter.apply(this, arguments)
       if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program')
-        visitors.push(visitor = HoistScope())
+        visitors.push(visitor = (recurse || !visitor)
+          ? HoistScope()
+          : {})
       return ret
     }
   , leave: function(node, parent) {
