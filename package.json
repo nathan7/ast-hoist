@@ -1,0 +1,21 @@
+{
+  "name": "ast-hoist",
+  "version": "1.0.0",
+  "description": "hoist your variables (and function declarations)",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nathan7/ast-hoist.git"
+  },
+  "keywords": [
+    "ast",
+    "hoist",
+    "esparse",
+    "esprima"
+  ],
+  "author": "Nathan Zadoks",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nathan7/ast-hoist/issues"
+  }
+}
