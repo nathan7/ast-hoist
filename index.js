@@ -8,16 +8,18 @@ function Hoist(recurse) {
   return (
   { enter: function(node, parent) {
       var ret = visitor && visitor.enter && visitor.enter.apply(this, arguments)
-      if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program')
-        visitors.push(visitor = (recurse || !visitor)
+      if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program') {
+        visitors.push(visitor)
+        visitor = (recurse || !visitor)
           ? HoistScope()
-          : {})
+          : {}
+      }
       return ret
     }
   , leave: function(node, parent) {
       var ret = visitor && visitor.leave && visitor.leave.apply(this, arguments)
       if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program')
-        visitors.pop(), visitor = visitors[visitors.length - 1]
+        visitor = visitors.pop()
       return ret
     }
   })
