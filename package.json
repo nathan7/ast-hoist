@@ -1,6 +1,6 @@
 {
   "name": "ast-hoist",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "hoist your variables (and function declarations)",
   "main": "index.js",
   "repository": {
