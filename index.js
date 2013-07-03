@@ -17,7 +17,7 @@ function Hoist(recurse) {
   , leave: function(node, parent) {
       var ret = visitor && visitor.leave && visitor.leave.apply(this, arguments)
       if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program')
-        visitor = visitors.pop()
+        visitors.pop(), visitor = visitors[visitors.length - 1]
       return ret
     }
   })
@@ -66,12 +66,15 @@ function HoistScope() {
     } }
   , leave: function(node, parent) {
       if (node.type !== 'FunctionExpression' && node.type !== 'FunctionDeclaration' && node.type !== 'Program') return
-      if (variables.length) node.body.body.unshift(
+      var body = node.body.body
+            ? node.body.body
+            : node.body
+      if (variables.length) body.unshift(
         { type: 'VariableDeclaration'
         , kind: 'var'
         , declarations: variables.map(function(variable) { return { type: 'VariableDeclarator', id: variable.id } })
         })
-      ;[].unshift.apply(node.body.body, functions)
+      ;[].unshift.apply(body, functions)
     }
   })
 }
