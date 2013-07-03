@@ -1,4 +1,4 @@
-# es-hoist 
+# ast-hoist 
 
   Hoists your variable and function declarations.
   Consumes/produces Mozilla ASTs.
