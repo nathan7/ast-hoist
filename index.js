@@ -34,7 +34,7 @@ function HoistScope() {
       case 'VariableDeclaration':
         ;[].push.apply(variables, node.declarations)
 
-        expression =
+        var expression =
           { type: 'SequenceExpression'
           , expressions: node.declarations.map(function(declaration) {
               if (declaration.init)
@@ -49,6 +49,7 @@ function HoistScope() {
             })
           }
 
+        var index
         if (parent.type === 'BlockStatement' && expression.expressions.length === 0) {
           if ((index = parent.body.indexOf(node)) !== -1)
             parent.body.splice(index, 1)
