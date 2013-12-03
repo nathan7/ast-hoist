@@ -1,84 +1,87 @@
 'use strict';
-module.exports = exports = Hoist
-exports.Hoist = Hoist
+module.exports = hoister
 
-function Hoist(recurse) {
-  recurse = !!recurse
-  var visitors = []
-    , visitor
-  return (
-  { enter: function(node, parent) {
-      var ret = visitor && visitor.enter && visitor.enter.apply(this, arguments)
-      if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program') {
-        visitors.push(visitor)
-        visitor = (recurse || !visitor)
-          ? HoistScope()
-          : {}
+var map = require('esmap')
+
+function hoister(node, recurse) {
+  if (node.type !== 'Program' && node.type !== 'FunctionDeclaration' && node.type !== 'FunctionExpression')
+    return node
+
+  return hoist(node)
+
+  function hoist(node) {
+    var identifiers = []
+      , declarations = []
+
+    node = map(node, collect)
+    function collect(node, key, parent) {
+      if (!node) return node
+
+      if (node.type === 'FunctionDeclaration') {
+        declarations.push(recurse
+          ? hoist(node)
+          : node)
+        return
       }
-      return ret
-    }
-  , leave: function(node, parent) {
-      var ret = visitor && visitor.leave && visitor.leave.apply(this, arguments)
-      if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program')
-        visitor = visitors.pop()
-      return ret
-    }
-  })
-}
 
-function HoistScope() {
-  var variables = []
-    , functions = []
-  return (
-  { enter: function(node, parent) { switch (node.type) {
-      case 'VariableDeclaration':
-        ;[].push.apply(variables, node.declarations)
+      if (node.type === 'FunctionExpression')
+        return recurse
+          ? hoist(node)
+          : node
 
-        var expression =
-          { type: 'SequenceExpression'
-          , expressions: node.declarations.map(function(declaration) {
-              if (declaration.init)
-                return (
-                { type: 'AssignmentExpression'
-                , operator: '='
-                , left: declaration.id
-                , right: declaration.init
-                })
-              else if (node === parent.left)
-                return declaration.id
-            })
+      if (node.type !== 'VariableDeclaration')
+        return map(node, collect)
+
+      ;[].push.apply(identifiers, node.declarations.map(function(declaration) {
+        return declaration.id
+      }))
+
+      var expressions = node.declarations
+          .filter(function(declarations) {
+            return declarations.init !== null
+          })
+          .map(function(declaration) {
+            return (
+              { type: 'AssignmentExpression'
+              , operator: '='
+              , left: declaration.id
+              , right: declaration.init
+              })
+          })
+        , expression = expressions.length === 1
+          ? expressions[0]
+          : { type: 'SequenceExpression'
+            , expressions: expressions
+            }
+
+      return key !== 'body'
+        ? expression
+        : { type: 'ExpressionStatement'
+          , expression: expression
           }
+    }
 
-        var index
-        if (parent.type === 'BlockStatement' && expression.expressions.length === 0) {
-          if ((index = parent.body.indexOf(node)) !== -1)
-            parent.body.splice(index, 1)
-          return
-        }
+    var body = node.body.type === 'BlockStatement'
+        ? node.body.body
+        : node.body
 
-        return (node === parent.left || node === parent.init)
-          ? expression
-          : { type: 'ExpressionStatement', expression: expression }
+    if (declarations.length)
+      body.unshift.apply(body, declarations)
 
-      break
-      case 'FunctionDeclaration':
-        functions.push(node)
-        if ((index = parent.body.indexOf(node)) !== -1)
-          parent.body.splice(index, 1)
-
-      break
-    } }
-  , leave: function(node, parent) {
-      if (node.type !== 'FunctionExpression' && node.type !== 'FunctionDeclaration' && node.type !== 'Program') return
-      var body = node.body.body
-            ? node.body.body
-            : node.body
-      if (variables.length) body.unshift(
+    if (identifiers.length)
+      body.unshift(
         { type: 'VariableDeclaration'
         , kind: 'var'
-        , declarations: variables.map(function(variable) { return { type: 'VariableDeclarator', id: variable.id } })
+        , declarations: identifiers
+            .map(function(identifier) {
+              return (
+                { type: 'VariableDeclarator'
+                , id: identifier
+                , init: null
+                })
+            })
         })
-      ;[].unshift.apply(body, functions)
-    }
-  })
+
+    return node
+  }
 }
