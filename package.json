@@ -17,5 +17,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/nathan7/ast-hoist/issues"
+  },
+  "dependencies": {
+    "esmap": "~1.1.0"
   }
 }
