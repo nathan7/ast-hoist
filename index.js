@@ -32,7 +32,7 @@ function hoister(node, recurse) {
       if (node.type !== 'VariableDeclaration')
         return map(node, collect)
 
-      ;[].push.apply(identifiers, node.declarations.map(function(declaration) {
+      identifiers.push.apply(identifiers, node.declarations.map(function(declaration) {
         return declaration.id
       }))
 
