@@ -53,7 +53,7 @@ function hoister(node, recurse) {
           : { type: 'SequenceExpression'
             , expressions: expressions
             }
-
+      if (parent.type == 'ForInStatement') return node.declarations[0].id
       return key !== 'body'
         ? expression
         : { type: 'ExpressionStatement'
