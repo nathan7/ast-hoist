@@ -4,7 +4,7 @@ module.exports = hoister
 var map = require('esmap')
 
 function hoister(node, recurse) {
-  if (node.type !== 'Program' && node.type !== 'FunctionDeclaration' && node.type !== 'FunctionExpression')
+  if (['Program', 'FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].indexOf(node.type) === -1)
     return node
 
   return hoist(node)
@@ -24,7 +24,7 @@ function hoister(node, recurse) {
         return
       }
 
-      if (node.type === 'FunctionExpression')
+      if (node.type === 'FunctionExpression' || node.type === 'ArrowFunctionExpression')
         return recurse
           ? hoist(node)
           : node
