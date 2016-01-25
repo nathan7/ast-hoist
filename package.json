@@ -19,6 +19,6 @@
     "url": "https://github.com/nathan7/ast-hoist/issues"
   },
   "dependencies": {
-    "esmap": "~1.1.0"
+    "esmap": "~1.2.0"
   }
 }
